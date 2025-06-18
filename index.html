@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tic Tac Toe - Modern</title>
+ <style> 
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #dadadad8;
+  color: #222;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #1e90ff;
+  text-shadow: 0 0 5px #add8e6;
+}
+
+.turn {
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e90ff;
+  text-shadow: 0 0 4px #add8e6;
+  min-height: 28px;
+}
+
+.modeToggleContainer {
+  margin-bottom: 15px;
+  user-select: none;
+  color: #1e90ff;
+  font-weight: 600;
+  text-shadow: 0 0 3px #add8e6;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.box {
+  background: #f0f0f0;
+  border-radius: 12px;
+  box-shadow: inset 0 0 6px #ccc, 0 0 8px #87cefa88;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: #1e90ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  position: relative;
+}
+
+.box:hover {
+  background: #dbefff;
+  box-shadow: inset 0 0 10px #87cefa, 0 0 12px #87cefa;
+}
+
+.box.x {
+  color: #ff4d4d;
+  text-shadow: 0 0 6px #ffb3b3;
+}
+
+.box.o {
+  color: #1e90ff;
+  text-shadow: 0 0 6px #add8e6;
+}
+
+.box.placed {
+  pointer-events: none;
+  animation: popIn 0.35s ease forwards;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.result {
+  font-size: 1.4rem;
+  font-weight: 700;
+  min-height: 30px;
+  color: #1e90ff;
+  text-shadow: 0 0 8px #add8e6;
+  margin-bottom: 20px;
+  height: 36px;
+}
+
+.scores {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.score-item {
+  background: #f9f9f9;
+  padding: 8px 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 6px #87cefa88;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+  user-select: none;
+  color: #333;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+}
+
+button {
+  background: #1e90ff;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 30px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px #87cefa;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  outline-offset: 3px;
+  outline: transparent;
+}
+
+button:hover,
+button:focus {
+  background: #187bcd;
+  box-shadow: 0 0 14px #1e90ff;
+  outline: none;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .board {
+    grid-template-columns: repeat(3, 70px);
+    grid-template-rows: repeat(3, 70px);
+    gap: 10px;
+  }
+  .box {
+    font-size: 3.5rem;
+  }
+}
+</style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+
+  <div class="modeToggleContainer">
+    <label>
+      <input type="checkbox" id="modeToggle" />
+      Play vs Computer (PvC)
+    </label>
+  </div>
+
+  <div class="turn" id="turnText">Turn: X</div>
+  <div class="board" id="board">
+    <div class="box" data-index="0"></div>
+    <div class="box" data-index="1"></div>
+    <div class="box" data-index="2"></div>
+    <div class="box" data-index="3"></div>
+    <div class="box" data-index="4"></div>
+    <div class="box" data-index="5"></div>
+    <div class="box" data-index="6"></div>
+    <div class="box" data-index="7"></div>
+    <div class="box" data-index="8"></div>
+  </div>
+  <div class="result" id="result"></div>
+  <div class="scores">
+    <div class="score-item">X: <span id="scoreX">0</span></div>
+    <div class="score-item">O: <span id="scoreO">0</span></div>
+    <div class="score-item">Draws: <span id="scoreDraw">0</span></div>
+  </div>
+  <div class="buttons">
+    <button id="playAgainBtn">Play Again</button>
+    <button id="resetScoresBtn">Reset Scores</button>
+  </div>
+
+  <script>
+    const boxes = document.querySelectorAll(".box");
+    const turnText = document.getElementById("turnText");
+    const resultText = document.getElementById("result");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+    const resetScoresBtn = document.getElementById("resetScoresBtn");
+    const scoreXEl = document.getElementById("scoreX");
+    const scoreOEl = document.getElementById("scoreO");
+    const scoreDrawEl = document.getElementById("scoreDraw");
+    const modeToggle = document.getElementById("modeToggle");
+
+    let turn = "X";
+    let board = Array(9).fill("");
+    let isGameOver = false;
+    let vsComputer = false;
+
+    let scores = {
+      X: 0,
+      O: 0,
+      Draw: 0
+    };
+
+    function updateTurnUI() {
+      turnText.textContent = `Turn: ${turn}`;
+    }
+
+    function updateScores() {
+      scoreXEl.textContent = scores.X;
+      scoreOEl.textContent = scores.O;
+      scoreDrawEl.textContent = scores.Draw;
+    }
+
+    function checkWin() {
+      const winConditions = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+
+      for (let condition of winConditions) {
+        const [a,b,c] = condition;
+        if (
+          board[a] && 
+          board[a] === board[b] && 
+          board[b] === board[c]
+        ) {
+          highlightWin(condition);
+          isGameOver = true;
+          resultText.textContent = `${board[a]} Wins! 🎉`;
+          scores[board[a]]++;
+          updateScores();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function highlightWin(cells) {
+      cells.forEach(i => {
+        boxes[i].style.boxShadow = "0 0 20px 6px #0ef, 0 0 25px 10px #0ef99";
+        boxes[i].style.borderRadius = "15px";
+      });
+    }
+
+    function checkDraw() {
+      if (!board.includes("") && !isGameOver) {
+        resultText.textContent = "It's a Draw!";
+        scores.Draw++;
+        updateScores();
+        isGameOver = true;
+        return true;
+      }
+      return false;
+    }
+
+    function resetBoard() {
+      board.fill("");
+      boxes.forEach(box => {
+        box.textContent = "";
+        box.classList.remove("x", "o", "placed");
+        box.style.boxShadow = "inset 0 0 8px #000, 0 0 12px #0ef";
+        box.style.borderRadius = "12px";
+      });
+      isGameOver = false;
+      resultText.textContent = "";
+    }
+
+    function handleClick(e) {
+      if (isGameOver) return;
+      const idx = e.target.dataset.index;
+      if (board[idx] !== "") return;
+      if (vsComputer && turn === "O") return; // Prevent player clicking on O turn in PvC
+
+      board[idx] = turn;
+      e.target.textContent = turn;
+      e.target.classList.add(turn.toLowerCase(), "placed");
+
+      if (!checkWin()) {
+        if (!checkDraw()) {
+          turn = turn === "X" ? "O" : "X";
+          updateTurnUI();
+
+          if (vsComputer && turn === "O") {
+            // Computer move after slight delay
+            setTimeout(computerMove, 400);
+          }
+        }
+      }
+    }
+
+    boxes.forEach(box => box.addEventListener("click", handleClick));
+
+    function computerMove() {
+      if (isGameOver) return;
+
+      // Minimax algorithm to pick best move
+      let bestScore = -Infinity;
+      let move = -1;
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          board[i] = "O";
+          let score = minimax(board, 0, false);
+          board[i] = "";
+          if (score > bestScore) {
+            bestScore = score;
+            move = i;
+          }
+        }
+      }
+      if (move !== -1) {
+        board[move] = "O";
+        const box = boxes[move];
+        box.textContent = "O";
+        box.classList.add("o", "placed");
+
+        if (!checkWin()) {
+          if (!checkDraw()) {
+            turn = "X";
+            updateTurnUI();
+          }
+        }
+      }
+    }
+
+    function minimax(newBoard, depth, isMaximizing) {
+      const scoresMap = {
+        O: 10 - depth,
+        X: depth - 10,
+        Draw: 0
+      };
+
+      let result = getWinner(newBoard);
+      if (result !== null) {
+        return scoresMap[result];
+      }
+
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (newBoard[i] === "") {
+            newBoard[i] = "O";
+            let score = minimax(newBoard, depth + 1, false);
+            newBoard[i] = "";
+            bestScore = Math.max(score, bestScore);
+          }
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (newBoard[i] === "") {
+            newBoard[i] = "X";
+            let score = minimax(newBoard, depth + 1, true);
+            newBoard[i] = "";
+            bestScore = Math.min(score, bestScore);
+          }
+        }
+        return bestScore;
+      }
+    }
+
+    function getWinner(bd) {
+      const winConditions = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+
+      for (let condition of winConditions) {
+        const [a,b,c] = condition;
+        if (
+          bd[a] &&
+          bd[a] === bd[b] &&
+          bd[b] === bd[c]
+        ) {
+          return bd[a];
+        }
+      }
+      if (!bd.includes("")) {
+        return "Draw";
+      }
+      return null;
+    }
+
+    playAgainBtn.addEventListener("click", () => {
+      resetBoard();
+      turn = "X";
+      updateTurnUI();
+      if (vsComputer && turn === "O") {
+        setTimeout(computerMove, 400);
+      }
+    });
+
+    resetScoresBtn.addEventListener("click", () => {
+      scores = { X:0, O:0, Draw:0 };
+      updateScores();
+      resetBoard();
+      turn = "X";
+      updateTurnUI();
+      if (vsComputer && turn === "O") {
+        setTimeout(computerMove, 400);
+      }
+    });
+
+    modeToggle.addEventListener("change", () => {
+      vsComputer = modeToggle.checked;
+      resetBoard();
+      turn = "X";
+      updateTurnUI();
+      resultText.textContent = "";
+      if (vsComputer && turn === "O") {
+        setTimeout(computerMove, 400);
+      }
+    });
+
+    updateTurnUI();
+    updateScores();
+  </script>
+</body>
+</html>
